@@ -25,54 +25,57 @@
   .band{flex:none}
 
   /* 1. identity */
-  .idbar{display:flex;align-items:center;justify-content:space-between;gap:3vw;flex-wrap:wrap}
+  .idbar{position:relative;display:flex;align-items:center;justify-content:flex-end;
+    gap:3vw;flex-wrap:wrap;padding:0 2.4vw}
+  .brand{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%)}
   .meta{text-align:right}
   .metaline{display:flex;align-items:baseline;justify-content:flex-end;gap:1.1vw;
     font-size:2.4vh;font-weight:500;color:var(--ink);white-space:nowrap}
   .metaline .dot{color:var(--faint);font-weight:400}
   .metaline .sk{color:var(--faint);font-size:.72em;letter-spacing:.12em;
-    text-transform:uppercase;margin-right:.35vw}
+    text-transform:uppercase;margin-right:.9vw}
   .metaline .num{font-variant-numeric:tabular-nums}
+  .sunwrap{margin-left:2.6vw}
   .dshort{display:none}
   .brand{display:flex;align-items:center;gap:1vw;min-width:0}
   .mark{background:var(--mark) center/contain no-repeat;aspect-ratio:512/432;
-    height:5.4vh;flex:none}
-  .org{font-size:1.9vh;letter-spacing:.22em;text-transform:uppercase;
-    color:var(--accent);font-weight:600;white-space:nowrap}
+    height:7vh;flex:none}
+
   .dates{text-align:right;white-space:nowrap}
-  .hijri{font-size:1.7vh;color:var(--faint);margin-top:.5vh}
+  .hijri{font-size:2.1vh;color:var(--dim);font-weight:500;margin-top:.55vh}
 
   /* 2. clock band: current time is the hero */
   /* 3. the five, equal weight, adhan and iqamah both labelled */
-  .allhead{display:none}
+  .allhead{display:grid;grid-template-columns:1fr 22% 26%;gap:2.5vw;
+    padding:0 2.4vw .8vh;border-bottom:.2vh solid var(--up-br);margin-bottom:.4vh}
+  .allhead span{font-size:1.5vh;letter-spacing:.2em;text-transform:uppercase;
+    color:var(--accent);font-weight:700;text-align:right}
   .all{flex:1;min-height:0;display:flex;flex-direction:column;gap:1.1vh}
   .p{flex:1;background:var(--card);border:.15vh solid var(--line);border-radius:1.4vh;
-    padding:0 2.4vw;display:grid;grid-template-columns:1fr auto auto;
+    padding:0 2.4vw;display:grid;grid-template-columns:1fr 22% 26%;
     align-items:center;gap:2.5vw;transition:background .4s,border-color .4s,flex .4s}
   .p .pn{font-size:3.4vh;font-weight:600;letter-spacing:.01em;color:var(--ink);
     display:flex;align-items:baseline;gap:1.2vw;min-width:0}
   .p .chip{font-size:1.9vh;font-weight:600;color:var(--accent);
     font-variant-numeric:tabular-nums;white-space:nowrap}
   .p .cell{display:flex;align-items:baseline;gap:.9vw;justify-content:flex-end}
-  .p .k{font-size:1.55vh;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  .p .k{display:none}
   .p .adh{font-size:2.8vh;font-weight:500;color:var(--dim);
-    font-variant-numeric:tabular-nums;min-width:8.5ch;text-align:right}
+    font-variant-numeric:tabular-nums;text-align:right}
   .p .iqa{font-size:4.6vh;font-weight:700;line-height:1.05;
-    font-variant-numeric:tabular-nums;min-width:8.5ch;text-align:right}
+    font-variant-numeric:tabular-nums;text-align:right}
   .p.past{opacity:.42}
   .p.up{flex:1.55;background:var(--up-bg);border-color:var(--up-br);border-width:.3vh}
   .p.up .pn{color:var(--accent);font-size:4.6vh}
   .p.up .adh{font-size:3.2vh}
   .p.up .iqa{font-size:7vh;color:var(--accent)}
   .p.up .chip{font-size:2.2vh}
+  .p.jum{flex:.8;background:var(--up-bg);border-color:var(--up-br);border-style:dashed}
+  .p.jum .pn{color:var(--accent)}
+  .p.jum .iqa{color:var(--accent);font-size:3.6vh}
+  .p.jum .sub{font-size:1.6vh;color:var(--dim);font-weight:500}
 
   /* 4. jumu'ah */
-  .info{display:flex;align-items:center;justify-content:center;gap:.5vh 2.4vw;
-    flex-wrap:wrap;padding:.4vh 2vw}
-  .info .k{font-size:1.5vh;letter-spacing:.14em;text-transform:uppercase;
-    color:var(--faint);white-space:nowrap}
-  .info .v{font-size:1.9vh;font-weight:600;color:var(--dim);
-    font-variant-numeric:tabular-nums;white-space:nowrap;margin-left:.6vw}
 
   /* 5. QR strip, equal halves */
   .qrbar{display:grid;grid-template-columns:1fr 1fr;gap:1.4vw}
@@ -94,42 +97,50 @@
   #stale p{font-size:3vh;color:#ffd9d9;margin-top:3vh;line-height:1.5;max-width:40ch}
   #stale .sm{font-size:2vh;color:#e0a0a0;margin-top:4vh}
 
-  /* 720p panels: lift the small type so it survives a 32 inch screen */
+  /* The centred logo needs the middle of the header clear, and the longest
+     dates in the calendar ("Wednesday, September 29, 2027") reach it below
+     4K widths. Those screens get the short date. */
+  @media (max-width:2000px){ .dlong{display:none} .dshort{display:inline} }
+
+  /* 720p panels: a 32 inch screen at 768px tall makes small type tiny, so
+     lift the secondary text. Selectors here must match the ones above. */
   @media (max-height:820px){
-    .org{font-size:2.1vh} .loc{font-size:1.6vh}
-    .greg{font-size:2.15vh} .hijri{font-size:1.75vh}
-    .sun .k{font-size:1.6vh} .p .k{font-size:1.6vh}
-    .qrs{font-size:1.7vh} .jum .w{font-size:1.9vh}
+    .metaline{font-size:2.5vh}
+    .hijri{font-size:2.25vh}
+    .allhead span{font-size:1.7vh}
+    .p .adh{font-size:3vh}
+    .p.jum .sub{font-size:1.8vh}
+    .qrs{font-size:1.7vh}
   }
 
   /* portrait: same bands, tighter type, compact date so the top line fits */
   @media (orientation:portrait){
     :root{--qr:8.5vh}
     #stage{gap:1.4vh;padding:2vh 3vw}
-    .idbar{flex-direction:column;align-items:flex-start;gap:.7vh}
+    .idbar{flex-direction:column;align-items:center;gap:.7vh;padding:0 3.5vw}
+    .brand{position:static;transform:none}
     .dlong{display:none} .dshort{display:inline}
     .meta{text-align:left;width:100%}
-    .metaline{justify-content:flex-start;font-size:2vh;gap:1.8vw}
-    .hijri{font-size:1.5vh;margin-top:.3vh}
+    .metaline{justify-content:space-between;font-size:2vh;gap:1.8vw;width:100%}
+    .sunwrap{margin-left:0}
+    .hijri{font-size:1.85vh;margin-top:.35vh}
     .all{gap:.9vh}
-    .allhead{display:grid;grid-template-columns:1fr 26% 32%;gap:2.5vw;
-      padding:0 3.5vw;margin-bottom:-.3vh}
-    .allhead span{font-size:1.35vh;letter-spacing:.16em;text-transform:uppercase;
-      color:var(--faint);text-align:right}
+    .allhead{grid-template-columns:1fr 26% 32%;padding:0 3.5vw .6vh}
+    .allhead span{font-size:1.4vh}
     .p{padding:0 3.5vw;gap:2.5vw;grid-template-columns:1fr 26% 32%}
+    .p.jum .iqa{font-size:2.9vh}
+    .p.jum .sub{font-size:1.3vh}
     .p .pn{font-size:2.7vh;flex-direction:column;align-items:flex-start;gap:.2vh}
     .p .chip{font-size:1.6vh}
     .p .k{display:none}
     .p .cell{gap:0}
-    .p .adh{font-size:2.1vh;min-width:0}
-    .p .iqa{font-size:3.3vh;min-width:0}
+    .p .adh{font-size:2.1vh}
+    .p .iqa{font-size:3.3vh}
     .p.up{flex:1.45}
     .p.up .pn{font-size:3.3vh}
     .p.up .adh{font-size:2.4vh}
     .p.up .iqa{font-size:3.8vh}
     .p.up .chip{font-size:1.75vh}
-    .info{gap:.4vh 2.4vw;padding:.3vh 2vw}
-    .info .k{font-size:1.35vh} .info .v{font-size:1.75vh;margin-left:.9vw}
     .qrbar{grid-template-columns:1fr 1fr;gap:2vw}
     .qrc{padding:1vh 2vw;gap:2.4vw}
     .qrt{font-size:1.7vh} .qrs{font-size:1.35vh;white-space:nowrap}
@@ -142,7 +153,6 @@
   <div class="band idbar">
     <div class="brand">
       <div class="mark" role="img" aria-label="ISOE"></div>
-      <div class="org">Islamic Society of Eastvale</div>
     </div>
     <div class="meta">
       <div class="metaline">
@@ -150,8 +160,7 @@
         <span id="gregs" class="dshort"></span>
         <span class="dot">&middot;</span>
         <span class="num" id="ctime">&nbsp;</span>
-        <span class="dot">&middot;</span>
-        <span><span class="sk">Sunrise</span><span class="num" id="sunrise">&nbsp;</span></span>
+        <span class="sunwrap"><span class="sk">Sunrise</span><span class="num" id="sunrise">&nbsp;</span></span>
       </div>
       <div class="hijri" id="hijri"></div>
     </div>
@@ -159,11 +168,6 @@
 
   <div class="allhead"><span></span><span>Adhan</span><span>Iqamah</span></div>
   <div class="all" id="all"></div>
-
-  <div class="band info">
-    <span><span class="k" id="jumk">Jumu'ah</span><span class="v" id="jumv">&nbsp;</span></span>
-    <span><span class="k">At</span><span class="v">Eastvale Community Center</span></span>
-  </div>
 
   <div class="band qrbar"><div class="qrc l"><div class="qrbox"><svg viewBox="0 0 33 33" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges"><path fill="currentColor" d="M0 0h7v1h-7zM9 0h1v1h-1zM12 0h4v1h-4zM17 0h7v1h-7zM26 0h7v1h-7zM0 1h1v1h-1zM6 1h1v1h-1zM9 1h1v1h-1zM11 1h1v1h-1zM13 1h4v1h-4zM18 1h1v1h-1zM20 1h1v1h-1zM23 1h1v1h-1zM26 1h1v1h-1zM32 1h1v1h-1zM0 2h1v1h-1zM2 2h3v1h-3zM6 2h1v1h-1zM9 2h2v1h-2zM13 2h1v1h-1zM17 2h2v1h-2zM20 2h1v1h-1zM22 2h1v1h-1zM24 2h1v1h-1zM26 2h1v1h-1zM28 2h3v1h-3zM32 2h1v1h-1zM0 3h1v1h-1zM2 3h3v1h-3zM6 3h1v1h-1zM9 3h2v1h-2zM13 3h4v1h-4zM18 3h1v1h-1zM22 3h1v1h-1zM26 3h1v1h-1zM28 3h3v1h-3zM32 3h1v1h-1zM0 4h1v1h-1zM2 4h3v1h-3zM6 4h1v1h-1zM11 4h1v1h-1zM14 4h1v1h-1zM17 4h2v1h-2zM23 4h1v1h-1zM26 4h1v1h-1zM28 4h3v1h-3zM32 4h1v1h-1zM0 5h1v1h-1zM6 5h1v1h-1zM8 5h1v1h-1zM10 5h2v1h-2zM15 5h5v1h-5zM21 5h2v1h-2zM24 5h1v1h-1zM26 5h1v1h-1zM32 5h1v1h-1zM0 6h7v1h-7zM8 6h1v1h-1zM10 6h1v1h-1zM12 6h1v1h-1zM14 6h1v1h-1zM16 6h1v1h-1zM18 6h1v1h-1zM20 6h1v1h-1zM22 6h1v1h-1zM24 6h1v1h-1zM26 6h7v1h-7zM9 7h3v1h-3zM14 7h5v1h-5zM20 7h2v1h-2zM23 7h2v1h-2zM0 8h1v1h-1zM3 8h1v1h-1zM5 8h2v1h-2zM8 8h2v1h-2zM12 8h3v1h-3zM16 8h1v1h-1zM21 8h1v1h-1zM23 8h1v1h-1zM25 8h1v1h-1zM27 8h1v1h-1zM0 9h2v1h-2zM4 9h2v1h-2zM7 9h1v1h-1zM11 9h1v1h-1zM13 9h1v1h-1zM16 9h2v1h-2zM20 9h2v1h-2zM24 9h4v1h-4zM31 9h2v1h-2zM1 10h6v1h-6zM8 10h4v1h-4zM13 10h2v1h-2zM16 10h1v1h-1zM19 10h1v1h-1zM22 10h1v1h-1zM24 10h1v1h-1zM27 10h2v1h-2zM30 10h1v1h-1zM32 10h1v1h-1zM0 11h3v1h-3zM4 11h1v1h-1zM9 11h1v1h-1zM12 11h2v1h-2zM16 11h1v1h-1zM21 11h4v1h-4zM28 11h2v1h-2zM31 11h2v1h-2zM1 12h1v1h-1zM5 12h4v1h-4zM10 12h3v1h-3zM14 12h6v1h-6zM21 12h1v1h-1zM23 12h4v1h-4zM29 12h1v1h-1zM31 12h2v1h-2zM0 13h1v1h-1zM4 13h2v1h-2zM7 13h1v1h-1zM10 13h1v1h-1zM14 13h2v1h-2zM17 13h1v1h-1zM19 13h3v1h-3zM24 13h3v1h-3zM28 13h5v1h-5zM1 14h2v1h-2zM6 14h1v1h-1zM9 14h2v1h-2zM14 14h4v1h-4zM21 14h1v1h-1zM23 14h1v1h-1zM25 14h2v1h-2zM30 14h2v1h-2zM1 15h2v1h-2zM8 15h1v1h-1zM11 15h4v1h-4zM16 15h3v1h-3zM20 15h2v1h-2zM24 15h1v1h-1zM26 15h1v1h-1zM31 15h1v1h-1zM0 16h2v1h-2zM3 16h2v1h-2zM6 16h3v1h-3zM12 16h4v1h-4zM17 16h1v1h-1zM19 16h4v1h-4zM24 16h1v1h-1zM26 16h1v1h-1zM28 16h1v1h-1zM31 16h1v1h-1zM0 17h1v1h-1zM4 17h2v1h-2zM7 17h1v1h-1zM9 17h1v1h-1zM12 17h1v1h-1zM17 17h1v1h-1zM21 17h1v1h-1zM23 17h1v1h-1zM27 17h1v1h-1zM29 17h1v1h-1zM3 18h4v1h-4zM8 18h2v1h-2zM11 18h1v1h-1zM13 18h1v1h-1zM21 18h2v1h-2zM26 18h1v1h-1zM30 18h3v1h-3zM0 19h1v1h-1zM2 19h4v1h-4zM7 19h1v1h-1zM9 19h1v1h-1zM11 19h1v1h-1zM14 19h1v1h-1zM16 19h4v1h-4zM21 19h2v1h-2zM24 19h1v1h-1zM26 19h2v1h-2zM31 19h1v1h-1zM4 20h8v1h-8zM13 20h2v1h-2zM16 20h1v1h-1zM18 20h1v1h-1zM21 20h1v1h-1zM23 20h3v1h-3zM1 21h1v1h-1zM5 21h1v1h-1zM7 21h1v1h-1zM11 21h3v1h-3zM15 21h1v1h-1zM18 21h1v1h-1zM20 21h2v1h-2zM24 21h3v1h-3zM30 21h3v1h-3zM0 22h2v1h-2zM3 22h4v1h-4zM8 22h1v1h-1zM12 22h1v1h-1zM14 22h1v1h-1zM17 22h1v1h-1zM19 22h1v1h-1zM21 22h2v1h-2zM26 22h2v1h-2zM29 22h1v1h-1zM32 22h1v1h-1zM1 23h1v1h-1zM3 23h3v1h-3zM7 23h1v1h-1zM9 23h1v1h-1zM11 23h1v1h-1zM15 23h1v1h-1zM19 23h1v1h-1zM21 23h1v1h-1zM23 23h2v1h-2zM28 23h2v1h-2zM32 23h1v1h-1zM0 24h1v1h-1zM2 24h2v1h-2zM5 24h4v1h-4zM10 24h1v1h-1zM12 24h1v1h-1zM14 24h1v1h-1zM17 24h5v1h-5zM23 24h6v1h-6zM8 25h6v1h-6zM15 25h1v1h-1zM19 25h3v1h-3zM24 25h1v1h-1zM28 25h2v1h-2zM32 25h1v1h-1zM0 26h7v1h-7zM11 26h1v1h-1zM13 26h2v1h-2zM17 26h2v1h-2zM22 26h1v1h-1zM24 26h1v1h-1zM26 26h1v1h-1zM28 26h4v1h-4zM0 27h1v1h-1zM6 27h1v1h-1zM8 27h1v1h-1zM10 27h1v1h-1zM15 27h4v1h-4zM20 27h3v1h-3zM24 27h1v1h-1zM28 27h1v1h-1zM31 27h2v1h-2zM0 28h1v1h-1zM2 28h3v1h-3zM6 28h1v1h-1zM11 28h4v1h-4zM17 28h2v1h-2zM20 28h3v1h-3zM24 28h6v1h-6zM0 29h1v1h-1zM2 29h3v1h-3zM6 29h1v1h-1zM8 29h1v1h-1zM13 29h3v1h-3zM17 29h2v1h-2zM20 29h1v1h-1zM23 29h2v1h-2zM26 29h1v1h-1zM28 29h3v1h-3zM0 30h1v1h-1zM2 30h3v1h-3zM6 30h1v1h-1zM11 30h2v1h-2zM16 30h1v1h-1zM20 30h1v1h-1zM22 30h4v1h-4zM28 30h1v1h-1zM32 30h1v1h-1zM0 31h1v1h-1zM6 31h1v1h-1zM9 31h2v1h-2zM13 31h1v1h-1zM15 31h4v1h-4zM20 31h2v1h-2zM23 31h4v1h-4zM29 31h1v1h-1zM0 32h7v1h-7zM8 32h2v1h-2zM11 32h1v1h-1zM13 32h3v1h-3zM17 32h1v1h-1zM19 32h1v1h-1zM21 32h5v1h-5zM28 32h2v1h-2zM31 32h1v1h-1z"/></svg></div><div class="qrtx"><div class="qrt">General Fund</div><div class="qrs">Scan to give</div></div></div><div class="qrc r"><div class="qrbox"><svg viewBox="0 0 33 33" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges"><path fill="currentColor" d="M0 0h7v1h-7zM8 0h2v1h-2zM12 0h1v1h-1zM14 0h1v1h-1zM17 0h2v1h-2zM20 0h3v1h-3zM26 0h7v1h-7zM0 1h1v1h-1zM6 1h1v1h-1zM8 1h2v1h-2zM17 1h3v1h-3zM21 1h2v1h-2zM24 1h1v1h-1zM26 1h1v1h-1zM32 1h1v1h-1zM0 2h1v1h-1zM2 2h3v1h-3zM6 2h1v1h-1zM8 2h4v1h-4zM15 2h1v1h-1zM19 2h3v1h-3zM23 2h2v1h-2zM26 2h1v1h-1zM28 2h3v1h-3zM32 2h1v1h-1zM0 3h1v1h-1zM2 3h3v1h-3zM6 3h1v1h-1zM11 3h2v1h-2zM17 3h3v1h-3zM21 3h1v1h-1zM23 3h1v1h-1zM26 3h1v1h-1zM28 3h3v1h-3zM32 3h1v1h-1zM0 4h1v1h-1zM2 4h3v1h-3zM6 4h1v1h-1zM8 4h2v1h-2zM12 4h4v1h-4zM19 4h3v1h-3zM26 4h1v1h-1zM28 4h3v1h-3zM32 4h1v1h-1zM0 5h1v1h-1zM6 5h1v1h-1zM9 5h1v1h-1zM12 5h3v1h-3zM20 5h1v1h-1zM23 5h1v1h-1zM26 5h1v1h-1zM32 5h1v1h-1zM0 6h7v1h-7zM8 6h1v1h-1zM10 6h1v1h-1zM12 6h1v1h-1zM14 6h1v1h-1zM16 6h1v1h-1zM18 6h1v1h-1zM20 6h1v1h-1zM22 6h1v1h-1zM24 6h1v1h-1zM26 6h7v1h-7zM9 7h1v1h-1zM11 7h1v1h-1zM13 7h1v1h-1zM19 7h1v1h-1zM22 7h2v1h-2zM0 8h1v1h-1zM3 8h6v1h-6zM10 8h1v1h-1zM14 8h4v1h-4zM23 8h1v1h-1zM25 8h1v1h-1zM28 8h1v1h-1zM30 8h3v1h-3zM0 9h2v1h-2zM3 9h1v1h-1zM7 9h2v1h-2zM11 9h2v1h-2zM14 9h2v1h-2zM18 9h2v1h-2zM22 9h2v1h-2zM28 9h3v1h-3zM0 10h1v1h-1zM4 10h4v1h-4zM9 10h3v1h-3zM14 10h3v1h-3zM18 10h1v1h-1zM21 10h5v1h-5zM28 10h5v1h-5zM0 11h1v1h-1zM4 11h1v1h-1zM7 11h1v1h-1zM9 11h4v1h-4zM14 11h2v1h-2zM17 11h1v1h-1zM19 11h2v1h-2zM25 11h3v1h-3zM30 11h1v1h-1zM1 12h2v1h-2zM4 12h1v1h-1zM6 12h1v1h-1zM9 12h3v1h-3zM13 12h2v1h-2zM16 12h1v1h-1zM18 12h1v1h-1zM20 12h1v1h-1zM24 12h1v1h-1zM26 12h2v1h-2zM32 12h1v1h-1zM7 13h1v1h-1zM12 13h2v1h-2zM16 13h1v1h-1zM20 13h1v1h-1zM22 13h2v1h-2zM27 13h1v1h-1zM0 14h2v1h-2zM4 14h3v1h-3zM9 14h1v1h-1zM11 14h4v1h-4zM16 14h1v1h-1zM19 14h2v1h-2zM24 14h1v1h-1zM26 14h2v1h-2zM29 14h2v1h-2zM2 15h1v1h-1zM4 15h1v1h-1zM8 15h1v1h-1zM10 15h6v1h-6zM22 15h1v1h-1zM24 15h2v1h-2zM27 15h4v1h-4zM32 15h1v1h-1zM0 16h1v1h-1zM3 16h2v1h-2zM6 16h1v1h-1zM8 16h2v1h-2zM11 16h1v1h-1zM13 16h1v1h-1zM19 16h2v1h-2zM22 16h8v1h-8zM4 17h1v1h-1zM7 17h1v1h-1zM10 17h2v1h-2zM15 17h6v1h-6zM22 17h1v1h-1zM24 17h3v1h-3zM28 17h1v1h-1zM30 17h3v1h-3zM0 18h3v1h-3zM5 18h3v1h-3zM9 18h1v1h-1zM12 18h1v1h-1zM14 18h2v1h-2zM18 18h2v1h-2zM22 18h2v1h-2zM25 18h3v1h-3zM29 18h2v1h-2zM32 18h1v1h-1zM0 19h1v1h-1zM5 19h1v1h-1zM7 19h1v1h-1zM10 19h1v1h-1zM13 19h3v1h-3zM20 19h1v1h-1zM23 19h1v1h-1zM25 19h1v1h-1zM28 19h3v1h-3zM32 19h1v1h-1zM0 20h3v1h-3zM6 20h3v1h-3zM10 20h1v1h-1zM12 20h4v1h-4zM18 20h2v1h-2zM22 20h1v1h-1zM27 20h1v1h-1zM29 20h1v1h-1zM31 20h1v1h-1zM0 21h2v1h-2zM3 21h1v1h-1zM5 21h1v1h-1zM8 21h1v1h-1zM11 21h1v1h-1zM14 21h1v1h-1zM16 21h5v1h-5zM22 21h2v1h-2zM27 21h3v1h-3zM0 22h1v1h-1zM2 22h3v1h-3zM6 22h3v1h-3zM15 22h2v1h-2zM20 22h1v1h-1zM22 22h2v1h-2zM25 22h2v1h-2zM31 22h2v1h-2zM0 23h1v1h-1zM3 23h1v1h-1zM5 23h1v1h-1zM7 23h1v1h-1zM11 23h2v1h-2zM16 23h5v1h-5zM22 23h1v1h-1zM25 23h3v1h-3zM30 23h3v1h-3zM0 24h3v1h-3zM4 24h4v1h-4zM9 24h1v1h-1zM15 24h1v1h-1zM18 24h3v1h-3zM24 24h6v1h-6zM32 24h1v1h-1zM8 25h1v1h-1zM10 25h1v1h-1zM12 25h1v1h-1zM14 25h1v1h-1zM16 25h1v1h-1zM18 25h1v1h-1zM21 25h4v1h-4zM28 25h1v1h-1zM30 25h2v1h-2zM0 26h7v1h-7zM8 26h3v1h-3zM12 26h4v1h-4zM18 26h2v1h-2zM21 26h1v1h-1zM23 26h2v1h-2zM26 26h1v1h-1zM28 26h1v1h-1zM30 26h1v1h-1zM0 27h1v1h-1zM6 27h1v1h-1zM8 27h3v1h-3zM14 27h1v1h-1zM18 27h2v1h-2zM23 27h2v1h-2zM28 27h3v1h-3zM0 28h1v1h-1zM2 28h3v1h-3zM6 28h1v1h-1zM8 28h2v1h-2zM11 28h1v1h-1zM15 28h1v1h-1zM17 28h4v1h-4zM22 28h7v1h-7zM31 28h1v1h-1zM0 29h1v1h-1zM2 29h3v1h-3zM6 29h1v1h-1zM8 29h1v1h-1zM10 29h1v1h-1zM12 29h1v1h-1zM14 29h1v1h-1zM18 29h5v1h-5zM25 29h1v1h-1zM27 29h1v1h-1zM31 29h2v1h-2zM0 30h1v1h-1zM2 30h3v1h-3zM6 30h1v1h-1zM11 30h2v1h-2zM16 30h2v1h-2zM19 30h1v1h-1zM21 30h2v1h-2zM24 30h1v1h-1zM27 30h3v1h-3zM31 30h2v1h-2zM0 31h1v1h-1zM6 31h1v1h-1zM10 31h2v1h-2zM15 31h2v1h-2zM22 31h1v1h-1zM27 31h2v1h-2zM30 31h3v1h-3zM0 32h7v1h-7zM8 32h4v1h-4zM14 32h1v1h-1zM22 32h1v1h-1zM24 32h1v1h-1zM27 32h2v1h-2z"/></svg></div><div class="qrtx"><div class="qrt">Power of 333</div><div class="qrs">Join the 333</div></div></div></div>
 </div>
@@ -179,13 +183,14 @@
 <script>
 (function(){
   // ?theme=light flips the palette, so both can be compared on the wall.
-  var _t = (location.search.match(/theme=(\w+)/)||[])[1] || 'dark';
+  var _t = (location.search.match(/theme=(\w+)/)||[])[1] || 'light';
   if (_t === 'light') document.documentElement.classList.add('lt');
 
   var D = [[300,1,1,1,1,0,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,0,1,1,1,1,0,1,1,1,1,0,1,1,1,0,1,1,1,0,1,1,0,1,0,1,1,0,1,0,1,0,1,0,1,0,0,1,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,0,0,-1,0,0,-1,0,-1,0,-1,0,-1,0,-1,0,-1,-1,0,-1,-1,-1,-1,0,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-2,-1,-1,-1,-1,-1,-2,-1,-1,-1,-2,-1,-1,-2,-1,-1,58,-1,-2,-1,-1,-2,-1,-2,-1,-1,-2,-1,-2,-1,-2,-1,-2,-1,-1,-2,-1,-2,-1,-2,-1,-2,-1,-2,-1,-1,-2,-1,-2,-1,-2,-1,-1,-2,-1,-2,-1,-1,-2,-1,-1,-2,-1,-1,-1,-2,-1,-1,-1,-1,-2,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,0,-1,-1,-1,0,-1,0,-1,-1,0,-1,0,-1,0,0,-1,0,0,0,-1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1,0,1,0,0,1,0,1,1,0,1,0,1,1,0,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,0,1,1,1,1,0,1,1,1,0,1,1,1,0,1,1,0,1,1,1,0,1,1,1,0,1,1,1,0,1,1,1,0,1,1,1,0,1,1,1,0,1,1,1,1,0],[330,0,0,0,0,0,0,0,0,0,0,0,0,0,15,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,15,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-15,0,0,0,0,0,0,0,0,0,0,0,0,0,-15,0,0,0,0,0,0,0,0,0,0,0,0,0,45,0,0,0,0,0,0,-15,0,0,0,0,0,0,0,0,0,0,0,0,0,-15,0,0,0,0,0,0,0,0,0,0,0,0,0,-15,0,0,0,0,0,0,0,0,0,0,0,0,0,-30,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,30,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,15,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,15,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,15,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[369,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,0,1,1,1,1,0,1,1,0,1,1,0,1,1,0,1,0,1,0,1,0,0,1,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,-1,0,0,0,0,-1,0,0,-1,0,0,-1,0,-1,0,-1,-1,0,-1,-1,0,-1,-1,-1,0,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-2,-1,-1,-1,-1,-2,-1,-1,-1,-2,-1,-1,-1,-2,-1,-1,-2,-1,59,-2,-1,-1,-2,-1,-1,-2,-1,-2,-1,-1,-2,-1,-1,-2,-1,-1,-2,-1,-1,-2,-1,-1,-2,-1,-1,-2,-1,-1,-2,-1,-1,-1,-1,-2,-1,-1,-1,-1,-2,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,0,-1,-1,-1,-1,0,-1,-1,0,-1,0,-1,-1,0,-1,0,0,-1,0,-1,0,0,-1,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,1,0,1,1,0,1,1,0,1,1,0,1,1,0,1,1,1,0,1,1,0,1,1,1,0,1,1,1,0,1,1,0,1,1,1,0,1,1,0,1,1,1,0,1,1,0,1,1,0,1,1,0,1,1,1,0,1,1,0,1,1,0,1,1,0,1,1,0,1,1,1,0,1,1,0,1,1,0,1,1,1,0,1,1,1,0,1,1,1,0,1,1,1,1,0,1,1,1,1,0,1,1,1,1,1,1,0,1,1],[695,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,1,0,0,1,0,0,0,1,0,1,0,0,1,0,1,0,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,0,1,0,1,0,0,1,0,1,0,0,1,0,0,0,1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,0,0,0,0,0,-1,0,0,0,0,-1,0,0,0,-1,0,0,0,-1,0,60,0,-1,0,0,-1,0,0,0,-1,0,0,-1,0,0,-1,0,0,0,-1,0,0,-1,0,0,0,-1,0,0,0,-1,0,0,0,-1,0,0,0,-1,0,0,0,0,0,-1,0,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,1,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,0,0,0,0,-1,0,0,0,0,-1,0,0,0,-1,0,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,-1,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,0,0,-1,0,0,-1,0,0,0,-1,0,0,0,0,0,-1,0,0,0,0,0,0,-1,0,0,0],[795,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[919,0,-1,-1,-1,-1,-1,0,-1,-1,0,-1,-1,0,-1,0,-1,0,-1,0,-1,0,-1,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0,0,1,0,1,0,1,0,1,1,0,1,1,0,1,1,1,0,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,0,1,1,1,1,0,1,1,1,0,1,1,0,1,1,0,1,1,0,1,1,0,1,0,61,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,0,1,0,1,0,1,0,0,1,0,1,0,0,1,0,1,0,0,1,0,0,1,0,1,0,0,1,0,1,0,0,1,0,0,1,0,1,0,0,1,0,0,1,0,1,0,0,1,0,0,1,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,0,1,0,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,0,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,-1,0,-1,0,-1,-1,0,-1,0,-1,-1,0,-1,-1,-1,0,-1,-1,-1,0,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,0,-1,-1,-1,-2,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-2,-1,-1,-1,-1,-1,-1,-2,-1,-1,-1,-1,-2,-1,-1,-1,-1,-1,-2,-1,-1,-1,-1,-1,-2,-1,-1,-1,-1,-1,-1,-1,-1,-2,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,0],[930,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,15,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,15,0,0,0,0,0,0,0,0,0,0,0,0,0,15,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,15,0,0,0,0,0,0,0,0,0,0,0,0,0,75,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,15,0,0,0,0,0,0,0,0,0,0,0,0,0,15,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,15,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,15,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-15,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-15,0,0,0,0,0,0,-15,0,0,0,0,0,0,0,0,0,0,0,0,0,-15,0,0,0,0,0,0,-15,0,0,0,0,0,0,0,0,0,0,0,0,0,-15,0,0,0,0,0,0,0,0,0,0,0,0,0,-15,0,0,0,0,0,0,-15,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[1019,-1,-1,-1,-1,-1,0,-1,-1,-1,0,-1,-1,0,-1,0,-1,-1,0,0,-1,0,-1,0,0,-1,0,0,0,0,0,-1,0,0,0,0,1,0,0,0,0,0,1,0,0,1,0,0,1,0,1,0,1,0,1,1,0,1,1,0,1,1,0,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,0,1,1,61,0,1,1,1,1,0,1,1,1,0,1,1,1,0,1,1,1,0,1,1,1,0,1,1,1,1,0,1,1,1,0,1,1,1,0,1,1,1,0,1,1,1,1,0,1,1,1,0,1,1,1,1,0,1,1,1,0,1,1,1,0,1,1,1,0,1,1,1,0,1,1,0,1,1,0,1,1,0,1,0,1,1,0,1,0,1,0,1,0,0,1,0,1,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,0,0,-1,0,0,-1,0,0,-1,0,-1,0,-1,-1,0,-1,0,-1,-1,-1,0,-1,-1,-1,0,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-2,-1,-1,-1,-1,-1,-2,-1,-1,-1,-2,-1,-1,-1,-2,-1,-1,-2,-1,-1,-2,-1,-2,-1,-1,-2,-1,-1,-2,-1,-2,-1,-1,-2,-1,-2,-1,-1,-2,-1,-2,-1,-1,-2,-1,-2,-1,-1,-2,-1,-1,-2,-1,-1,-2,-1,-1,-1,-2,-1,-1,-1,-2,-1,-1,-1,-1,-2,-1,-1,-1,-1,-1,-1,-1,-1,-1],[1027,-1,-1,-1,-1,-1,0,-1,-1,-1,0,-1,-1,0,-1,0,-1,-1,0,0,-1,0,-1,0,0,-1,0,0,0,0,0,-1,0,0,0,0,1,0,0,0,0,0,1,0,0,1,0,0,1,0,1,0,1,0,1,1,0,1,1,0,1,1,0,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,0,1,1,61,0,1,1,1,1,0,1,1,1,0,1,1,1,0,1,1,1,0,1,1,1,0,1,1,1,1,0,1,1,1,0,1,1,1,0,1,1,1,0,1,1,1,1,0,1,1,1,0,1,1,1,1,0,1,1,1,0,1,1,1,0,1,1,1,0,1,1,1,0,1,1,0,1,1,0,1,1,0,1,0,1,1,0,1,0,1,0,1,0,0,1,0,1,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,0,0,-1,0,0,-1,0,0,-1,0,-1,0,-1,-1,0,-1,0,-1,-1,-1,0,-1,-1,-1,0,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-2,-1,-1,-1,-1,-1,-2,-1,-1,-1,-2,-1,-1,-1,-2,-1,-1,-2,-1,-1,-2,-1,-2,-1,-1,-2,-1,-1,-2,-1,-2,-1,-1,-2,-1,-2,-1,-1,-2,-1,-2,-1,-1,-2,-1,-2,-1,-1,-2,-1,-1,-2,-1,-1,-2,-1,-1,-1,-2,-1,-1,-1,-2,-1,-1,-1,-1,-2,-1,-1,-1,-1,-1,-1,-1,-1,-1],[1088,-1,-1,-1,0,-1,-1,0,-1,-1,0,-1,0,-1,0,-1,0,-1,0,0,-1,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,1,0,0,1,0,1,0,1,0,1,0,1,1,0,1,0,1,1,1,0,1,1,0,1,1,1,1,0,1,1,1,1,0,1,1,1,1,1,1,0,1,1,1,1,1,1,1,0,1,1,1,1,1,1,0,1,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,0,1,1,1,1,0,61,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,0,1,1,0,1,0,1,0,1,0,1,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,-1,0,0,-1,0,0,-1,0,-1,0,-1,0,-1,-1,0,-1,-1,-1,0,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-2,-1,-1,-1,-1,-2,-1,-1,-2,-1,-1,-2,-1,-1,-2,-1,-2,-1,-1,-2,-1,-2,-1,-2,-1,-2,-1,-2,-1,-1,-2,-1,-2,-1,-2,-1,-2,-1,-2,-1,-2,-1,-2,-1,-2,-1,-2,-1,-2,-1,-2,-1,-2,-1,-1,-2,-1,-2,-1,-1,-2,-1,-1,-2,-1,-1,-1,-2,-1,-1,-1,-2,-1,-1,-1,-1,-1,-1,-1,-2,-1,-1,-1,-1,0,-1,-1,-1],[1200,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,45,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,15,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,30,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,15,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-15,0,0,0,0,0,0,0,0,0,0,0,0,0,-15,0,0,0,0,0,0,-15,0,0,0,0,0,0,0,0,0,0,0,0,0,-15,0,0,0,0,0,0,-15,0,0,0,0,0,0,0,0,0,0,0,0,0,-30,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]];
   var START = "2026-11-01", NDAYS = 365, MGOFF = 8;
-  var JUM = 790;
+  var JUM = 790, JUMWHERE = "Eastvale Community Center";
   var TZ = 'America/Los_Angeles';
+  var HOLD = 15 * 60;   // seconds a prayer keeps the highlight after its iqamah
 
   var cols = D.map(function(c){ var o=[c[0]]; for(var i=1;i<c.length;i++) o.push(o[i-1]+c[i]); return o; });
   function day(i){ return cols.map(function(c){ return c[i]; }); }
@@ -240,7 +245,7 @@
   }
 
   var E = {};
-  ['greg','gregs','hijri','ctime','sunrise','all','jumk','jumv','stale','stage'].forEach(function(k){
+  ['greg','gregs','hijri','ctime','sunrise','all','stale','stage'].forEach(function(k){
     E[k] = document.getElementById(k) || document.querySelector('#'+k);
   });
   E.stage = document.getElementById('stage');
@@ -278,14 +283,14 @@
     }
     var left = target - t.secs;
 
-    // A prayer whose iqamah started in the last ten minutes is what is
-    // actually happening, so that row is the one to highlight. Otherwise
-    // highlight the next one. After Isha nothing is upcoming today, so fall
-    // back to Fajr and say it is tomorrow's.
+    // A prayer whose iqamah started within HOLD is what is actually
+    // happening, so that row stays highlighted rather than jumping ahead.
+    // Otherwise highlight the next one. After Isha nothing is upcoming
+    // today, so fall back to Fajr and say it is tomorrow's.
     var justPassed = -1;
     for (var q=0;q<5;q++){
       var gone = t.secs - list[q].iqamah*60;
-      if (gone >= 0 && gone < 600) justPassed = q;
+      if (gone >= 0 && gone < HOLD) justPassed = q;
     }
     var hi = (justPassed >= 0) ? justPassed : (ni >= 0 ? ni : 0);
     var key = t.iso+'|'+hi+'|'+(justPassed>=0?'j':'-')+'|'+(tomorrow?'t':'d');
@@ -309,10 +314,18 @@
              +      '<span class="iqa">'+hhmm(list[k].iqamah)+'</span></div>'
              +  '</div>';
       }
+      // On Fridays Jumu'ah already stands in the list in Dhuhr's place. Any
+      // other day it gets its own row, so it is never buried in small print.
+      if (t.wd !== 'Fri'){
+        html += '<div class="p jum">'
+             +    '<div class="pn">Jumu\'ah<span class="sub">Fridays &middot; ' + JUMWHERE + '</span></div>'
+             +    '<div class="cell"></div>'
+             +    '<div class="cell"><span class="iqa">' + hhmm(JUM) + '</span></div>'
+             +  '</div>';
+      }
       E.all.innerHTML = html;
 
-      E.jumk.textContent = (t.wd === 'Fri') ? "Jumu'ah today" : "Jumu'ah";
-      E.jumv.textContent = hhmm(JUM);
+
     }
 
     var chip = document.getElementById('chip');
