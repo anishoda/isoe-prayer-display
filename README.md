@@ -101,6 +101,7 @@ What the script sets up:
 - A nightly job at 02:40 that fetches the latest page. It checks that the download is the real display before replacing the working copy, so a wifi login page cannot replace good times with nonsense.
 - A TV power schedule that runs every minute and follows the prayer timetable in the page.
 - Screen blanking and the mouse pointer turned off.
+- The desktop panel stopped at login. It is a Wi-Fi password agent, and a kiosk does not need it (see Step 7).
 - Screen rotation, if you set `ROTATE`, kept in place by a script that re-applies it whenever the TV drops and restores its HDMI link.
 
 ## Step 6. Check the display and rotation
@@ -163,7 +164,20 @@ sudo nmcli connection delete "netplan-wlan0-NETWORK NAME"
 
 Replace `FILENAME.yaml` with the name the first command printed, and use the exact profile name that `nmcli connection show` lists (it starts with `netplan-wlan0-`). Then reboot with `sudo reboot` and run `nmcli -f NAME,ACTIVE connection show`. `isoe-wifi` should be active, no box should appear on the TV, and the Pi should show as online in Connect. Test this once while you are next to the Pi.
 
-If the old profile comes back after a reboot, something is regenerating it. A network cable avoids Wi-Fi problems altogether, so use one wherever the TV has a jack nearby.
+Also stop cloud-init from regenerating the Wi-Fi profile, and tighten a file permission that NetworkManager warns about:
+
+```
+echo 'network: {config: disabled}' | sudo tee /etc/cloud/cloud.cfg.d/99-disable-network-config.cfg
+sudo chmod 600 /lib/netplan/00-network-manager-all.yaml
+```
+
+The password box is shown by the desktop panel (`wf-panel-pi`), which acts as NetworkManager's password agent. If the Wi-Fi drops and authentication fails, the panel asks for the password and the box lands on top of the display. `setup-pi.sh` stops the panel at login. On a Pi installed earlier, run this once, reboot, then check that `pgrep -a wf-panel-pi` prints nothing:
+
+```
+echo "(sleep 8; pkill -f 'lwrespawn /usr/bin/wf-panel-pi'; pkill -x wf-panel-pi) &" >> ~/.config/labwc/autostart
+```
+
+To get logs if the Wi-Fi ever drops, make the journal persistent: `sudo mkdir -p /var/log/journal && sudo systemctl restart systemd-journald`. A network cable avoids Wi-Fi problems altogether, so use one wherever the TV has a jack nearby.
 
 ## Step 8. TV settings
 

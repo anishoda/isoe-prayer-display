@@ -168,6 +168,9 @@ sudo -u "$KIOSK_USER" mkdir -p "$HOME_DIR/.config/labwc" \
 cat > "$HOME_DIR/.config/labwc/autostart" <<LAB
 $ROTCMD
 unclutter -idle 0 &
+# The desktop panel is a Wi-Fi password agent: if Wi-Fi ever fails, it pops a
+# password box over the display. A kiosk does not need it, so stop it.
+(sleep 8; pkill -f 'lwrespawn /usr/bin/wf-panel-pi'; pkill -x wf-panel-pi) &
 $LAUNCH &
 LAB
 chmod +x "$HOME_DIR/.config/labwc/autostart"
