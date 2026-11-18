@@ -57,7 +57,7 @@ curl -fsSL --max-time 60 "\$URL" -o "\$TMP"
 # sanity gates: real size, our marker, and a decoded payload
 [ "\$(stat -c%s "\$TMP")" -gt 8000 ] || { echo "too small, ignoring"; exit 1; }
 grep -q "gen-salah-display.py" "\$TMP"  || { echo "not the display page, ignoring"; exit 1; }
-grep -q "Islamic Society of Eastvale" "\$TMP" || { echo "no org marker, ignoring"; exit 1; }
+grep -q "ISOE Prayer Times" "\$TMP" || { echo "no title marker, ignoring"; exit 1; }
 if ! cmp -s "\$TMP" "$PAGE"; then
   cp "\$TMP" "$PAGE"
   echo "\$(date -Is) updated from \$URL"
@@ -117,10 +117,12 @@ systemctl enable --now isoe-display-update.timer
 # in use is read.
 # ---------------------------------------------------------------------------
 echo "==> kiosk autostart for user $KIOSK_USER"
-CHROME_FLAGS="--kiosk --noerrdialogs --disable-infobars --disable-session-crashed-bubble \
+CHROME_FLAGS="--kiosk --password-store=basic --noerrdialogs --disable-infobars --disable-session-crashed-bubble \
 --disable-features=Translate --check-for-update-interval=31536000 \
 --autoplay-policy=no-user-gesture-required --start-fullscreen"
-LAUNCH="chromium-browser $CHROME_FLAGS file://$PAGE"
+CHROMIUM="$(command -v chromium || command -v chromium-browser || true)"
+[ -n "$CHROMIUM" ] || { echo "no chromium binary found after install"; exit 1; }
+LAUNCH="$CHROMIUM $CHROME_FLAGS file://$PAGE"
 
 # Screen rotation. The connector is named HDMI-A-1 under Wayland and HDMI-1
 # under X11, and which one exists depends on the Pi OS image, so try each and
@@ -129,16 +131,31 @@ if [ "$ROTATE" != "0" ]; then
   case "$ROTATE" in 90) XDIR=left;; 180) XDIR=inverted;; 270) XDIR=right;; esac
   cat > "$APP/rotate.sh" <<ROT
 #!/usr/bin/env bash
-for o in HDMI-A-1 HDMI-A-2; do
-  wlr-randr --output \\$o --transform $ROTATE 2>/dev/null && exit 0
-done
-for o in HDMI-1 HDMI-2; do
-  xrandr --output \\$o --rotate $XDIR 2>/dev/null && exit 0
+# Keep the screen rotated. When the TV drops its HDMI link (standby, power off,
+# the nightly schedule) the compositor resets the rotation, so a one-shot
+# command at login is not enough: re-apply it whenever it goes back to normal.
+T=$ROTATE
+if command -v wlr-randr >/dev/null 2>&1 && [ -n "\${WAYLAND_DISPLAY:-}" ]; then
+  while true; do
+    if wlr-randr 2>/dev/null | grep -q 'Transform: *normal'; then
+      for o in HDMI-A-1 HDMI-A-2; do
+        wlr-randr --output \$o --transform \$T 2>/dev/null && break
+      done
+    fi
+    sleep 3
+  done
+fi
+# X11 sessions: rotate once, retrying while the display comes up.
+for try in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20; do
+  for o in HDMI-1 HDMI-2; do
+    xrandr --output \$o --rotate $XDIR 2>/dev/null && exit 0
+  done
+  sleep 1
 done
 exit 0
 ROT
   chmod +x "$APP/rotate.sh"
-  ROTCMD="$APP/rotate.sh"
+  ROTCMD="$APP/rotate.sh &"
   echo "==> screen rotation $ROTATE degrees"
 else
   ROTCMD="true"
@@ -151,6 +168,9 @@ sudo -u "$KIOSK_USER" mkdir -p "$HOME_DIR/.config/labwc" \
 cat > "$HOME_DIR/.config/labwc/autostart" <<LAB
 $ROTCMD
 unclutter -idle 0 &
+# The desktop panel is a Wi-Fi password agent: if Wi-Fi ever fails, it pops a
+# password box over the display. A kiosk does not need it, so stop it.
+(sleep 8; pkill -f 'lwrespawn /usr/bin/wf-panel-pi'; pkill -x wf-panel-pi) &
 $LAUNCH &
 LAB
 chmod +x "$HOME_DIR/.config/labwc/autostart"
@@ -178,16 +198,147 @@ DSK
 chown -R "$KIOSK_USER:$KIOSK_USER" "$HOME_DIR/.config"
 
 # ---------------------------------------------------------------------------
-# TV power via HDMI-CEC. Saves the panel and the power bill, and means nobody
-# has to find the remote. Times are deliberately wide of Fajr and Isha.
+# TV power via HDMI-CEC, following the prayer timetable inside the page:
+# on 30 min before Fajr adhan, off 60 min after Isha iqamah. (The old fixed
+# 04:30 / 21:45 cron was wrong for about four months of the year.)
 # ---------------------------------------------------------------------------
+rm -f /etc/cron.d/isoe-display-tv
 if [ "$HAVE_CEC" = "1" ]; then
-  echo "==> TV on 04:30, off 21:45 (HDMI-CEC)"
-  cat > /etc/cron.d/isoe-display-tv <<'CRN'
-SHELL=/bin/bash
-30 4 * * *  root  echo 'on 0'      | cec-client -s -d 1 >/dev/null 2>&1
-45 21 * * * root  echo 'standby 0' | cec-client -s -d 1 >/dev/null 2>&1
-CRN
+  echo "==> TV schedule follows prayer times (HDMI-CEC)"
+  cat > "$APP/tv-schedule.py" <<'TVPY'
+#!/usr/bin/env python3
+"""ISOE prayer display: switch the TV on and off over HDMI-CEC to follow the
+prayer timetable baked into the display page itself.
+
+  TV on   30 minutes before Fajr adhan
+  TV off  60 minutes after Isha iqamah
+
+Run every minute from a systemd timer. It works out what state the TV should be
+in right now and only sends a command when that differs from the last one it
+sent, so a reboot or power cut mid-night puts the TV back in the right state
+within a minute. Reads the same file the kiosk shows, so the TV and the screen
+can never disagree about the times.
+
+  tv-schedule.py                  normal run
+  tv-schedule.py --today          print today's on/off times and exit
+  tv-schedule.py --at 2027-06-19T22:50 --dry-run   what would happen then
+"""
+import argparse, datetime as dt, json, os, re, subprocess, sys, time
+from zoneinfo import ZoneInfo
+
+PAGE = os.environ.get("ISOE_PAGE", "/opt/isoe-display/display.html")
+STATE = os.environ.get("ISOE_STATE", "/var/lib/isoe-display/tv-state")
+TZ = ZoneInfo("America/Los_Angeles")
+ON_BEFORE_FAJR = 30    # minutes
+OFF_AFTER_ISHA = 60    # minutes
+FAJR_ADHAN, ISHA_IQAMA = 0, 10   # column order used by the page's data array
+
+
+def load(path):
+    s = open(path, encoding="utf-8").read()
+    d = json.loads(re.search(r"var D = (\[\[.*?\]\]);", s, re.S).group(1))
+    start = re.search(r'var START = "(\d{4}-\d{2}-\d{2})"', s).group(1)
+    ndays = int(re.search(r"NDAYS = (\d+)", s).group(1))
+    cols = []
+    for c in d:                       # delta-encoded: running sum per column
+        o = [c[0]]
+        for v in c[1:]:
+            o.append(o[-1] + v)
+        cols.append(o)
+    return cols, dt.date.fromisoformat(start), ndays
+
+
+def window(cols, start, ndays, day):
+    i = (day - start).days
+    if not 0 <= i < ndays:
+        return None
+    return cols[FAJR_ADHAN][i] - ON_BEFORE_FAJR, cols[ISHA_IQAMA][i] + OFF_AFTER_ISHA
+
+
+def hm(m):
+    return f"{m // 60:02d}:{m % 60:02d}"
+
+
+def desired(cols, start, ndays, now):
+    w = window(cols, start, ndays, now.date())
+    if w is None:
+        return "on"   # calendar ran out: keep the screen up so the red warning is seen
+    m = now.hour * 60 + now.minute
+    return "on" if w[0] <= m < w[1] else "off"
+
+
+def cec(cmd):
+    r = subprocess.run(["cec-client", "-s", "-d", "1"], input=cmd + "\n",
+                       text=True, capture_output=True, timeout=45)
+    return r.returncode == 0
+
+
+def send(state):
+    if state == "off":
+        return cec("standby 0")
+    ok = cec("on 0")
+    time.sleep(8)            # let the TV finish waking, then claim its input
+    return cec("as") and ok
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--today", action="store_true")
+    ap.add_argument("--at", help="pretend it is this local time (YYYY-MM-DDTHH:MM)")
+    ap.add_argument("--dry-run", action="store_true")
+    a = ap.parse_args()
+
+    cols, start, ndays = load(PAGE)
+    now = dt.datetime.fromisoformat(a.at).replace(tzinfo=TZ) if a.at else dt.datetime.now(TZ)
+
+    if a.today:
+        w = window(cols, start, ndays, now.date())
+        print("calendar ended, TV stays on" if w is None else
+              f"{now.date()}  TV on {hm(w[0])}  off {hm(w[1])}")
+        return 0
+
+    want = desired(cols, start, ndays, now)
+    try:
+        last = open(STATE).read().strip()
+    except OSError:
+        last = ""
+    if want == last:
+        return 0
+    print(f"{now:%F %R} TV should be {want} (was {last or 'unknown'})", flush=True)
+    if a.dry_run:
+        return 0
+    if send(want):
+        os.makedirs(os.path.dirname(STATE), exist_ok=True)
+        open(STATE, "w").write(want)
+        return 0
+    print("cec command failed, will retry next minute", file=sys.stderr)
+    return 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())
+TVPY
+  chmod +x "$APP/tv-schedule.py"
+  cat > /etc/systemd/system/isoe-display-tv.service <<SVC
+[Unit]
+Description=ISOE prayer display TV power schedule
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 $APP/tv-schedule.py
+StateDirectory=isoe-display
+SVC
+  cat > /etc/systemd/system/isoe-display-tv.timer <<TMR
+[Unit]
+Description=Check ISOE TV power schedule every minute
+[Timer]
+OnBootSec=60
+OnCalendar=minutely
+AccuracySec=5s
+[Install]
+WantedBy=timers.target
+TMR
+  systemctl daemon-reload
+  systemctl enable --now isoe-display-tv.timer
 else
   echo "==> no cec-client, skipping the TV on/off schedule"
 fi
@@ -198,7 +349,8 @@ cat <<DONE
 
    page        $PAGE
    update      $APP/update.sh          (timer: isoe-display-update.timer)
-   TV schedule /etc/cron.d/isoe-display-tv  (only if cec-client installed)
+   TV schedule $APP/tv-schedule.py  (timer: isoe-display-tv.timer)
+               check:  sudo $APP/tv-schedule.py --today
 
    Reboot to start the kiosk:   sudo reboot
 
